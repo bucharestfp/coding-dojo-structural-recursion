@@ -1,4 +1,4 @@
-Supporting code for [Bucharest FP #018 — Coding Dojo: Structural Recursion in Haskell][0].
+### [Bucharest FP #018 — Coding Dojo: Structural Recursion in Haskell][0]
 
 ```bash
 $ ghci
