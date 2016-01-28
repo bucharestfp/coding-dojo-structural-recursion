@@ -6,8 +6,11 @@ import Prelude hiding ((++), (!!), all, any, concat, drop, filter, find, foldl, 
 --
 
 
--- Alternative recursive definition of linked lists.
-data List a = Nil | Cons a (List a)
+-- Alternative definition of linked lists. This is what's called an
+-- Algebraic Data Type, or ADT for short.
+data List a
+  = Nil
+  | Cons a (List a)
 
 
 --
@@ -29,8 +32,16 @@ data List a = Nil | Cons a (List a)
 -- ghci> head [1,2,3]
 -- 1
 --
-head = undefined
+head :: [a] -> a
+head list =
+  case list of
+    [] -> error "empty list"
+    x : xs -> x
 
+
+-- data Maybe a =
+--     Nothing
+--   | Just a
 
 --
 -- Extract the head of the list, if any. Use Maybe to convey optionality.
@@ -41,7 +52,11 @@ head = undefined
 -- ghci> headMaybe [1,2,3]
 -- Just 1
 --
-headMaybe = undefined
+headMaybe :: [a] -> Maybe a
+headMaybe list =
+  case list of
+    [] -> Nothing
+    x : _ -> Just x
 
 
 --
@@ -53,7 +68,9 @@ headMaybe = undefined
 -- ghci> tail [1,2,3]
 -- [2,3]
 --
-tail = undefined
+tail :: [a] -> [a]
+tail [] = error "empty list"
+tail (_ : xs) = xs
 
 
 --
@@ -65,7 +82,9 @@ tail = undefined
 -- ghci> tailMaybe [1,2,3]
 -- Just [2,3]
 --
-tailMaybe = undefined
+tailMaybe :: [a] -> Maybe [a]
+tailMaybe [] = Nothing
+tailMaybe (_ : xs) = Just xs
 
 
 --
@@ -76,7 +95,21 @@ tailMaybe = undefined
 -- ghci> length [1,2,3]
 -- 3
 --
-length = undefined
+length :: [a] -> Int
+length [] = 0
+length (_ : xs) =
+  1 + length xs
+  -- add 1 (length xs)
+  -- length ...
+
+
+lengthTCO :: [a] -> Int
+lengthTCO list =
+  let
+    loop []     accum = accum
+    loop (x:xs) accum = loop xs (accum + 1)
+  in
+    loop list 0
 
 
 --
@@ -96,7 +129,15 @@ length = undefined
 -- ghci> [] !! 0
 -- *** Exception: index too large
 --
-(!!) = undefined
+(!!) :: [a] -> Int -> a
+(!!) list n =
+  case n of
+    _ | n < 0 -> error "negative index"
+    _ -> case list of
+          [] -> error "index too large"
+          (x:xs) -> case n of 0 -> x
+                              _ -> xs !! (n-1)
+
 
 
 --
@@ -108,7 +149,16 @@ length = undefined
 -- ghci> map (\a -> a + 2) [1,2,3]
 -- [3,4,5]
 --
-map = undefined
+map :: (a -> b) -> [a] -> [b]
+map func [] = []
+map func (x:xs) = (func x) : (map func xs)
+
+mapTCO :: (a -> b) -> [a] -> [b]
+mapTCO func list =
+  let
+    loop [] accum = accum
+    loop (x:xs) accum = loop xs (accum ++ [func x])
+  in loop list []
 
 
 --
@@ -125,7 +175,9 @@ map = undefined
 -- ghci> find (==4) [1,2,3]
 -- Nothing
 --
-find = undefined
+find :: (a -> Bool) -> [a] -> Maybe a
+find _ [] = Nothing
+find pred (x:xs) = if pred x then Just x else find pred xs
 
 
 -- ghci> filter odd []
@@ -140,7 +192,17 @@ find = undefined
 -- ghci> filter even [1,2,3]
 -- [2]
 --
-filter = undefined
+filter :: (a -> Bool) -> [a] -> [a]
+filter _ [] = []
+filter func (x:xs) =
+  if func x
+  then x : filter func xs
+  else filter func xs
+
+
+-- TEMĂ
+filterTCO :: (a -> Bool) -> [a] -> [a]
+filterTCO = undefined
 
 
 --
@@ -155,8 +217,10 @@ filter = undefined
 -- ghci> all odd [2,4]
 -- False
 --
-all = undefined
-
+all :: (a -> Bool) -> [a] -> Bool
+all _ [] = True
+all func (x : xs) =
+  func x && all func xs
 
 --
 -- Determine whether *any element* of a list satisfy the given predicate.
@@ -173,7 +237,9 @@ all = undefined
 -- ghci> any odd [2]
 -- False
 --
-any = undefined
+any :: (a -> Bool) -> [a] -> Bool
+any _ [] = False
+any func (x : xs) = if func x then True else any func xs
 
 
 --
@@ -188,7 +254,11 @@ any = undefined
 -- ghci> concat [[1,2,3], [], [4,5,6]]
 -- [1,2,3,4,5,6]
 --
-concat = undefined
+
+concat :: [[a]] -> [a]
+concat [] = []
+concat ([]:xs) = concat xs
+concat ((x:xs):rest) = x:(concat (xs:rest))
 
 
 --
@@ -214,11 +284,12 @@ concat = undefined
 -- [1,2,3]
 --
 -- ghci> take 4 [1,2,3]
--- [1,2,3]
---
-take = undefined
-
-
+-- [1
+take :: Int -> [a] -> [a]
+take 0 _ = []
+--take 1 (x:xs) = [x]
+take n (x:xs) = x : (take (n-1) xs)
+take _ [] = []
 --
 -- Produce a list without the first `n` elements, where `n` is user-supplied.
 --
@@ -243,7 +314,10 @@ take = undefined
 -- ghci> drop 4 [1,2,3]
 -- []
 --
-drop = undefined
+drop :: Int -> [a] -> [a]
+drop 0 list = list
+drop n [] = []
+drop n (x:xs) = drop (n - 1) xs
 
 
 --
@@ -268,7 +342,10 @@ drop = undefined
 -- ghci> zip [1,2] [4,5,6]
 -- [(1,4), (2,5)]
 --
-zip = undefined
+zip :: [a] -> [b] -> [(a, b)]
+zip [] _ = []
+zip _ [] = []
+zip (x:xs) (y:ys) = (x,y): (zip xs ys)
 
 
 --
@@ -286,7 +363,9 @@ zip = undefined
 -- ghci> [1,2,3] ++ [4,5,6]
 -- [1,2,3,4,5,6]
 --
-(++) = undefined
+(++) :: [a] -> [a] -> [a]
+[]     ++ xs = xs
+(x:xs) ++ ys = x : (xs ++ ys)
 
 
 --
@@ -298,8 +377,9 @@ zip = undefined
 -- ghci> reverse [1,2,3]
 -- [3,2,1]
 --
-reverse = undefined
-
+reverse :: [a] -> [a]
+reverse [] = []
+reverse (x:xs) = (reverse xs) ++ [x]
 
 --
 -- ghci> foldl (+) 0 []
