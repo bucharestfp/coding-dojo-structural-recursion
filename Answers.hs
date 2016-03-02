@@ -145,8 +145,9 @@ concatTCO lists =
   let
     loop lists result =
       case lists of
-        [] -> result
-        xs : xss -> loop xss (result ++ xs)
+        [] -> reverse result
+        [] : xs -> loop xs result
+        (x : xs) : rest -> loop (xs : rest) (x : result)
   in
     loop lists []
 
