@@ -260,6 +260,9 @@ concat [] = []
 concat ([]:xs) = concat xs
 concat ((x:xs):rest) = x:(concat (xs:rest))
 
+concatTCO :: [[a]] -> [a]
+concatTCO = undefined
+
 
 --
 -- Produce a list with the first `n` elements of a list, where `n` is a
@@ -290,6 +293,10 @@ take 0 _ = []
 --take 1 (x:xs) = [x]
 take n (x:xs) = x : (take (n-1) xs)
 take _ [] = []
+
+takeTCO :: Int -> [a] -> [a]
+takeTCO = undefined
+
 --
 -- Produce a list without the first `n` elements, where `n` is user-supplied.
 --
@@ -347,6 +354,9 @@ zip [] _ = []
 zip _ [] = []
 zip (x:xs) (y:ys) = (x,y): (zip xs ys)
 
+zipTCO :: [a] -> [b] -> [(a, b)]
+zipTCO = undefined
+
 
 --
 -- Append two lists together. Hint: pattern match on the first list.
@@ -367,6 +377,9 @@ zip (x:xs) (y:ys) = (x,y): (zip xs ys)
 []     ++ xs = xs
 (x:xs) ++ ys = x : (xs ++ ys)
 
+appendTCO :: [a] -> [a] -> [a]
+appendTCO = undefined
+
 
 --
 -- Reverse a list. Hint: use (++).
@@ -380,6 +393,9 @@ zip (x:xs) (y:ys) = (x,y): (zip xs ys)
 reverse :: [a] -> [a]
 reverse [] = []
 reverse (x:xs) = (reverse xs) ++ [x]
+
+reverseTCO :: [a] -> [a]
+reverseTCO = undefined
 
 --
 -- ghci> foldl (+) 0 []
