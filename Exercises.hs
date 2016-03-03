@@ -14,7 +14,7 @@ data List a
 
 
 --
--- Here's how to approach these exercises.
+-- Here's how to approach these exercises:
 --
 -- 1. Define the function's signature based on the given examples.
 -- 2. Decompose the appropriate parameter using pattern matching:
@@ -99,8 +99,6 @@ length :: [a] -> Int
 length [] = 0
 length (_ : xs) =
   1 + length xs
-  -- add 1 (length xs)
-  -- length ...
 
 
 lengthTCO :: [a] -> Int
@@ -135,9 +133,8 @@ lengthTCO list =
     _ | n < 0 -> error "negative index"
     _ -> case list of
           [] -> error "index too large"
-          (x:xs) -> case n of 0 -> x
-                              _ -> xs !! (n-1)
-
+          (x : xs) -> case n of 0 -> x
+                                _ -> xs !! (n-1)
 
 
 --
@@ -151,13 +148,14 @@ lengthTCO list =
 --
 map :: (a -> b) -> [a] -> [b]
 map func [] = []
-map func (x:xs) = (func x) : (map func xs)
+map func (x : xs) = (func x) : (map func xs)
+
 
 mapTCO :: (a -> b) -> [a] -> [b]
 mapTCO func list =
   let
     loop [] accum = accum
-    loop (x:xs) accum = loop xs (accum ++ [func x])
+    loop (x : xs) accum = loop xs (accum ++ [func x])
   in loop list []
 
 
@@ -177,7 +175,7 @@ mapTCO func list =
 --
 find :: (a -> Bool) -> [a] -> Maybe a
 find _ [] = Nothing
-find pred (x:xs) = if pred x then Just x else find pred xs
+find pred (x : xs) = if pred x then Just x else find pred xs
 
 
 -- ghci> filter odd []
@@ -194,7 +192,7 @@ find pred (x:xs) = if pred x then Just x else find pred xs
 --
 filter :: (a -> Bool) -> [a] -> [a]
 filter _ [] = []
-filter func (x:xs) =
+filter func (x : xs) =
   if func x
   then x : filter func xs
   else filter func xs
@@ -221,6 +219,7 @@ all :: (a -> Bool) -> [a] -> Bool
 all _ [] = True
 all func (x : xs) =
   func x && all func xs
+
 
 --
 -- Determine whether *any element* of a list satisfy the given predicate.
@@ -257,8 +256,9 @@ any func (x : xs) = if func x then True else any func xs
 
 concat :: [[a]] -> [a]
 concat [] = []
-concat ([]:xs) = concat xs
-concat ((x:xs):rest) = x:(concat (xs:rest))
+concat ([] : xs) = concat xs
+concat ((x : xs) : rest) = x : (concat (xs : rest))
+
 
 concatTCO :: [[a]] -> [a]
 concatTCO = undefined
@@ -294,8 +294,10 @@ take 0 _ = []
 take n (x:xs) = x : (take (n-1) xs)
 take _ [] = []
 
+
 takeTCO :: Int -> [a] -> [a]
 takeTCO = undefined
+
 
 --
 -- Produce a list without the first `n` elements, where `n` is user-supplied.
@@ -324,7 +326,7 @@ takeTCO = undefined
 drop :: Int -> [a] -> [a]
 drop 0 list = list
 drop n [] = []
-drop n (x:xs) = drop (n - 1) xs
+drop n (x : xs) = drop (n - 1) xs
 
 
 --
@@ -352,7 +354,8 @@ drop n (x:xs) = drop (n - 1) xs
 zip :: [a] -> [b] -> [(a, b)]
 zip [] _ = []
 zip _ [] = []
-zip (x:xs) (y:ys) = (x,y): (zip xs ys)
+zip (x : xs) (y : ys) = (x, y) : (zip xs ys)
+
 
 zipTCO :: [a] -> [b] -> [(a, b)]
 zipTCO = undefined
@@ -374,8 +377,9 @@ zipTCO = undefined
 -- [1,2,3,4,5,6]
 --
 (++) :: [a] -> [a] -> [a]
-[]     ++ xs = xs
-(x:xs) ++ ys = x : (xs ++ ys)
+[]       ++ xs = xs
+(x : xs) ++ ys = x : (xs ++ ys)
+
 
 appendTCO :: [a] -> [a] -> [a]
 appendTCO = undefined
@@ -392,10 +396,12 @@ appendTCO = undefined
 --
 reverse :: [a] -> [a]
 reverse [] = []
-reverse (x:xs) = (reverse xs) ++ [x]
+reverse (x : xs) = (reverse xs) ++ [x]
+
 
 reverseTCO :: [a] -> [a]
 reverseTCO = undefined
+
 
 --
 -- ghci> foldl (+) 0 []
