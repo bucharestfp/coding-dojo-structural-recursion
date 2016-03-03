@@ -51,6 +51,15 @@ lengthTCO list =
     loop list 0
 
 
+lengthFold :: [a] -> Int
+lengthFold list =
+  let
+    init = 0
+    fold count _ = count + 1
+  in
+    foldl fold init list
+
+
 (!!) :: [a] -> Int -> a
 list !! index =
   if index < 0
@@ -62,6 +71,23 @@ list !! index =
         if index == 0
         then x
         else xs !! (index - 1)
+
+
+nthFold :: [a] -> Int -> a
+nthFold list n =
+  if n < 0
+  then error "negative index"
+  else
+    let
+      fold (Nothing, n') x
+        | n == n'   = (Just x, n)
+        | otherwise = (Nothing, n' + 1)
+      fold result _ = result
+      init = (Nothing, 0)
+    in
+      case foldl fold init list of
+        (Just elem, _) -> elem
+        (Nothing, _) -> error "index too large"
 
 
 map :: (a -> b) -> [a] -> [b]
@@ -82,6 +108,17 @@ mapTCO fn list =
     loop list []
 
 
+mapFold :: (a -> b) -> [a] -> [b]
+mapFold fn list =
+  let
+    init = []
+    fold result x = (fn x) : result
+  in
+    reverse (foldl fold init list)
+    reverse $ foldl fold init list
+    -- foldr (flip fold) init list
+
+
 find :: (a -> Bool) -> [a] -> Maybe a
 find predicate list =
   case list of
@@ -90,6 +127,17 @@ find predicate list =
       if predicate x
       then Just x
       else find predicate xs
+
+
+findFold :: (a -> Bool) -> [a] -> Maybe a
+findFold predicate list =
+  let
+    init = Nothing
+    fold Nothing x | predicate x = Just x
+                   | otherwise = Nothing
+    fold result _ = result
+  in
+    foldl fold init list
 
 
 filter :: (a -> Bool) -> [a] -> [a]
@@ -113,6 +161,18 @@ filterTCO predicate list =
     loop list []
 
 
+filterFold :: (a -> Bool) -> [a] -> [a]
+filterFold pred =
+  let
+    init = []
+    fold result x
+      | pred x = x : result
+      | otherwise = result
+  in
+    reverse . foldl fold init
+    -- foldr (flip fold) init
+
+
 all :: (a -> Bool) -> [a] -> Bool
 all predicate list =
   case list of
@@ -123,6 +183,15 @@ all predicate list =
       else False
 
 
+allFold :: (a -> Bool) -> [a] -> Bool
+allFold predicate list =
+  let
+    fold result x = predicate x && result
+    init = True
+  in
+    foldl fold init list
+
+
 any :: (a -> Bool) -> [a] -> Bool
 any predicate list =
   case list of
@@ -131,6 +200,15 @@ any predicate list =
       if predicate x
       then True
       else any predicate xs
+
+
+anyFold :: (a -> Bool) -> [a] -> Bool
+anyFold predicate list =
+  let
+    init = False
+    fold _ x = predicate x
+  in
+    foldl fold init list
 
 
 concat :: [[a]] -> [a]
@@ -150,6 +228,17 @@ concatTCO lists =
         (x : xs) : rest -> loop (xs : rest) (x : result)
   in
     loop lists []
+
+
+concatFold :: [[a]] -> [a]
+concatFold lists =
+  let
+    init = []
+    -- fold' result x = x : result
+    -- fold result xs = reverse (foldl fold' (reverse result) xs)
+    fold result xs = reverse (foldl (flip (:)) (reverse result) xs)
+  in
+    foldl fold init lists
 
 
 take :: Int -> [a] -> [a]
@@ -176,6 +265,16 @@ takeTCO n list =
     loop list n []
 
 
+takeFold :: Int -> [a] -> [a]
+takeFold n =
+  let
+    init = ([], n)
+    fold (result, 0) _ = (result, 0)
+    fold (result, n) x = (x : result, n - 1)
+  in
+    reverse . fst . foldl fold init
+
+
 drop :: Int -> [a] -> [a]
 drop n list =
   case list of
@@ -184,6 +283,16 @@ drop n list =
       if n == 0
       then list
       else drop (n - 1) xs
+
+
+dropFold :: Int -> [a] -> [a]
+dropFold n =
+  let
+    init = ([], n)
+    fold (result, 0) x = (x : result, 0)
+    fold (result, n) _ = (result, n - 1)
+  in
+    reverse . fst . foldl fold init
 
 
 zip :: [a] -> [b] -> [(a, b)]
@@ -206,6 +315,16 @@ zipTCO xs ys =
     loop xs ys []
 
 
+zipFold :: [a] -> [b] -> [(a, b)]
+zipFold as bs =
+  let
+    init = ([], bs)
+    fold (result, []) a = (result, [])
+    fold (result, b : bs) a = ((a, b) : result, bs)
+  in
+    reverse . fst $ foldl fold init as
+
+
 (++) :: [a] -> [a] -> [a]
 xs ++ ys =
   case xs of
@@ -222,6 +341,15 @@ appendTCO xs ys =
         y : ys -> loop ys (y : result)
   in
     loop ys (reverse xs)
+
+
+appendFold :: [a] -> [a] -> [a]
+appendFold as bs =
+  let
+    init = reverse as
+    fold result b = b : result
+  in
+    reverse (foldl fold init bs)
 
 
 reverse :: [a] -> [a]
@@ -242,15 +370,19 @@ reverseTCO xs =
     loop xs []
 
 
+reverseFold :: [a] -> [a]
+reverseFold = foldl (flip (:)) []
+
+
 foldl :: (b -> a -> b) -> b -> [a] -> b
-foldl fn seed list =
+foldl fn init list =
   case list of
-    [] -> seed
-    x : xs -> foldl fn (fn seed x) xs
+    [] -> init
+    x : xs -> foldl fn (fn init x) xs
 
 
 foldr :: (a -> b -> b) -> b -> [a] -> b
-foldr fn seed list =
+foldr fn init list =
   case list of
-    [] -> seed
-    x : xs -> fn x (foldr fn seed xs)
+    [] -> init
+    x : xs -> fn x (foldr fn init xs)

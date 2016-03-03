@@ -421,3 +421,47 @@ foldl = undefined
 -- 2
 --
 foldr = undefined
+
+
+--
+-- Reformulate all of the above in terms of either foldl or foldr.
+--
+
+lengthFold :: [a] -> Int
+lengthFold = undefined
+
+nthFold :: [a] -> Int -> a
+nthFold = undefined
+
+mapFold :: (a -> b) -> [a] -> [b]
+mapFold = undefined
+
+findFold :: (a -> Bool) -> [a] -> Maybe a
+findFold = undefined
+
+filterFold :: (a -> Bool) -> [a] -> [a]
+filterFold = undefined
+
+allFold :: (a -> Bool) -> [a] -> Bool
+allFold = undefined
+
+anyFold :: (a -> Bool) -> [a] -> Bool
+anyFold = undefined
+
+concatFold :: [[a]] -> [a]
+concatFold = undefined
+
+takeFold :: Int -> [a] -> [a]
+takeFold = undefined
+
+dropFold :: Int -> [a] -> [a]
+dropFold = undefined
+
+zipFold :: [a] -> [b] -> [(a, b)]
+zipFold = undefined
+
+appendFold :: [a] -> [a] -> [a]
+appendFold = undefined
+
+reverseFold :: [a] -> [a]
+reverseFold = undefined
