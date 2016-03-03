@@ -471,3 +471,6 @@ appendFold = undefined
 
 reverseFold :: [a] -> [a]
 reverseFold = undefined
+
+foldlUsingFoldr = undefined
+foldrUsingFoldl = undefined
