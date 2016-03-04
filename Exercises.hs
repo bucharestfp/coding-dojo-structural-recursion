@@ -152,12 +152,13 @@ map func (x : xs) = (func x) : (map func xs)
 
 
 mapTCO :: (a -> b) -> [a] -> [b]
-mapTCO func list =
+mapTCO f list =
   let
-    loop [] accum = accum
-    loop (x : xs) accum = loop xs (accum ++ [func x])
-  in loop list []
+    loop []     result = reverse result
+    loop (x:xs) result = loop xs ((f x):result)
 
+  in
+    loop list []
 
 --
 -- Find the first element in the list that satisfies the given predicate
@@ -200,7 +201,13 @@ filter func (x : xs) =
 
 -- TEMĂ
 filterTCO :: (a -> Bool) -> [a] -> [a]
-filterTCO = undefined
+filterTCO f list =
+  let
+    loop [] acc = acc
+    loop (x:xs) acc =
+      loop xs $ if f x then x:acc else acc
+  in
+    reverse $ loop list []
 
 
 --
@@ -261,7 +268,13 @@ concat ((x : xs) : rest) = x : (concat (xs : rest))
 
 
 concatTCO :: [[a]] -> [a]
-concatTCO = undefined
+concatTCO list =
+  let
+    loop []              accum = reverse accum
+    loop ([] : ls)       accum = loop ls accum
+    loop ((x : xs) : ls) accum = loop (xs : ls) (x : accum)
+  in
+    loop list []
 
 
 --
@@ -290,13 +303,18 @@ concatTCO = undefined
 -- [1
 take :: Int -> [a] -> [a]
 take 0 _ = []
---take 1 (x:xs) = [x]
 take n (x:xs) = x : (take (n-1) xs)
 take _ [] = []
 
 
 takeTCO :: Int -> [a] -> [a]
-takeTCO = undefined
+takeTCO n list =
+  let
+    loop 0 _ acc = reverse acc
+    loop _ [] acc = reverse acc
+    loop i (x:xs) acc = loop (i - 1) xs (x:acc)
+  in
+    loop n list []
 
 
 --
@@ -358,7 +376,13 @@ zip (x : xs) (y : ys) = (x, y) : (zip xs ys)
 
 
 zipTCO :: [a] -> [b] -> [(a, b)]
-zipTCO = undefined
+zipTCO xs ys =
+  let
+    loop [] _  acc           = reverse acc
+    loop _  [] acc           = reverse acc
+    loop (x:xs') (y:ys') acc = loop xs' ys' ((x, y):acc)
+  in
+    loop xs ys []
 
 
 --
@@ -382,7 +406,12 @@ zipTCO = undefined
 
 
 appendTCO :: [a] -> [a] -> [a]
-appendTCO = undefined
+appendTCO list1 list2 =
+  let
+    loop [] acc = acc
+    loop (x:xs) acc = loop xs (x:acc)
+  in
+    loop (reverse list1) list2
 
 
 --
@@ -400,7 +429,12 @@ reverse (x : xs) = (reverse xs) ++ [x]
 
 
 reverseTCO :: [a] -> [a]
-reverseTCO = undefined
+reverseTCO list =
+  let
+    loop [] accum = accum
+    loop (x:xs) accum = loop xs (x:accum)
+  in
+    loop list []
 
 
 --
@@ -413,7 +447,19 @@ reverseTCO = undefined
 -- ghci> foldl (-) 0 [1,2,3]
 -- -6
 --
-foldl = undefined
+-- foldl (head-tail) (empty-case) list
+foldl :: (b->a->b) -> b -> [a] -> b
+-- foldl func init list =
+--   let
+--     loop [] init = init
+--     loop (x:xs) accum = loop xs (func accum x)
+--   in
+--     loop list init
+
+foldl func init [] = init
+foldl func init (x:xs) = foldl (func) (func init x) xs
+
+
 
 
 --
@@ -426,7 +472,9 @@ foldl = undefined
 -- ghci> foldr (-) 0 [1,2,3]
 -- 2
 --
-foldr = undefined
+foldr :: (a->b->b) -> b -> [a] -> b
+foldr func init [] = init
+foldr func init (x:xs) = func x (foldr func init xs)
 
 
 --
@@ -434,10 +482,16 @@ foldr = undefined
 --
 
 lengthFold :: [a] -> Int
-lengthFold = undefined
+lengthFold list = foldl  (\acc x  -> acc + 1 ) 0  list
 
-nthFold :: [a] -> Int -> a
-nthFold = undefined
+nthFold :: [a] -> Int -> Maybe a
+nthFold list poz =
+  let
+    init = Nothing
+    fold x (acc, current) =
+      if poz == current then (Just x, current + 1) else (acc, current + 1)
+  in
+    fst $ foldr fold (init,0) list
 
 mapFold :: (a -> b) -> [a] -> [b]
 mapFold = undefined
